@@ -403,9 +403,8 @@ let sendMail = (req, res) => {
                     from: '"Scheduler"',
                     to: userDetails.email,
                     subject: '"Welcome to Scheduler"',
-                    html: `<h2>Link to reset password</h2><br><h4>You have recieved the link to change the password.<a href="http://ec2-13-234-217-245.ap-south-1.compute.amazonaws.com/${userDetails.userId}/change">Click here...</a></h4>`
+                    html: `<h2>Link to reset password</h2><br><h4>You have recieved the link to change the password.<a href="http://ec2-13-234-31-91.ap-south-1.compute.amazonaws.com/${userDetails.userId}/change">Click here...</a></h4>`
                 }
-                sgMail.send(msg);
 
                 transporter.sendMail(mailOptions, function (err, data) {
                     if (err) {
@@ -643,6 +642,7 @@ let acceptrequest=(req,res)=>{
 }
 
 let deletereq=(friendreqId)=>{
+    console.log(friendreqId)
     friendreqModel.deleteOne({friendreqId:friendreqId},(err,result)=>{
     })
 
@@ -673,7 +673,7 @@ let getfriends=(req,res)=>{
     let apiResponse=response.generate(true,'some error occured',500,null)
     res.send(apiResponse)
         } else if(check.isEmpty(result)) {
-            let apiResponse = response.generate(true, 'Event not found', 404, null)
+            let apiResponse = response.generate(true, 'friendlist empty', 404, null)
             res.send(apiResponse)
         } 
         else {
@@ -684,12 +684,16 @@ let getfriends=(req,res)=>{
     })
 }
 let unfriend=(req,res)=>{
+    console.log(req.body.friendreqId)
     friendsModel.deleteOne({friendreqId:req.body.friendreqId},(err,result)=>{
         if(err){
             logger.error('some error occured','un friend',5)
     let apiResponse=response.generate(true,'some error occured',500,null)
     res.send(apiResponse)
-        }
+        }else if(check.isEmpty(result)) {
+            let apiResponse = response.generate(true, 'friendlist empty', 404, null)
+            res.send(apiResponse)
+        } 
         else {
             let apiResponse=response.generate(false,"Unfriend successfully",200,result);
             res.send(apiResponse);
@@ -753,7 +757,8 @@ let sendrequest=(req,res)=>{
             }
             else {
                 logger.error('some error occured','friendsId',5)
-                let apiResponse=response.generate(true,'already friends',500,null)
+                let apiResponse=response.generate(true,'already friends',500,result)
+                console.log(apiResponse)
                 reject(apiResponse)
             }
          })
